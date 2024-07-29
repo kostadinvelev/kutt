@@ -48,12 +48,6 @@ jobs:
         echo "PUBLIC_IP=${PUBLIC_IP}" >> public_ip.txt
       shell: bash
 
-    - name: Load Public IP
-      run: |
-        source public_ip.txt
-        echo "Loaded PUBLIC_IP=$PUBLIC_IP"
-      shell: bash
-
     - name: Add private key to SSH agent
       uses: webfactory/ssh-agent@v0.5.3
       with:
@@ -61,7 +55,7 @@ jobs:
 
     - name: Deploy to EC2
       run: |
-        source public_ip.txt
+        PUBLIC_IP=$(cat public_ip.txt | cut -d '=' -f 2)
         ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@$PUBLIC_IP << 'EOF'
           cd /app_docker_storage/kutt
           git pull

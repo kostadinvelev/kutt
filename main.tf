@@ -72,17 +72,49 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_eip" "kutt_eip" {
-  vpc = true
+  instance = aws_instance.kutt_instance.id
+
+  tags = {
+    Name = "KuttEIP"
+  }
+}
+
+resource "aws_iam_role" "ec2_instance_role" {
+  name = "ec2_instance_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+    }]
+  })
+
+  tags = {
+    Name = "KuttEC2Role"
+  }
+}
+
+resource "aws_iam_instance_profile" "ec2_instance_profile" {
+  name = "ec2_instance_profile"
+  role = aws_iam_role.ec2_instance_role.name
+
+  tags = {
+    Name = "KuttEC2InstanceProfile"
+  }
 }
 
 resource "aws_instance" "kutt_instance" {
-  ami                    = "ami-0c55b159cbfafe1f0"  # Amazon Linux 2 AMI
-  instance_type          = var.ec2_instance_type
-  subnet_id              = aws_subnet.public.id
-  security_group_ids     = [aws_security_group.allow_ssh_http.id]
-  key_name               = var.ssh_key_name
+  ami                         = "ami-0c55b159cbfafe1f0"  # Amazon Linux 2 AMI
+  instance_type               = var.ec2_instance_type
+  subnet_id                   = aws_subnet.public.id
+  security_group_ids          = [aws_security_group.allow_ssh_http.id]
+  key_name                    = var.ssh_key_name
   associate_public_ip_address = true
-  iam_instance_profile   = aws_iam_instance_profile.ec2_instance_profile.name
+  iam_instance_profile        = aws_iam_instance_profile.ec2_instance_profile.name
 
   tags = {
     Name = "KuttAppInstance"
@@ -94,6 +126,10 @@ resource "aws_instance" "kutt_instance" {
 resource "aws_ebs_volume" "kutt_storage" {
   availability_zone = aws_instance.kutt_instance.availability_zone
   size              = var.volume_size
+
+  tags = {
+    Name = "KuttStorage"
+  }
 }
 
 resource "aws_volume_attachment" "attach_ebs" {
@@ -103,5 +139,5 @@ resource "aws_volume_attachment" "attach_ebs" {
 }
 
 output "public_ip" {
-  value = aws_eip.kutt_eip.public_ip
+  value = aws_instance.kutt_instance.public_ip
 }

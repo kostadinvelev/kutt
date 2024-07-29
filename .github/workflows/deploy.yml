@@ -42,9 +42,7 @@ jobs:
 
     - name: Get Public IP
       id: get_ip
-      run: |
-        PUBLIC_IP=$(terraform output -raw public_ip | head -n 1 | tr -d '\r')
-        echo $PUBLIC_IP > public_ip.txt
+      run: terraform output -raw public_ip > public_ip.txt
       shell: bash
 
     - name: Add private key to SSH agent

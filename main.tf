@@ -108,7 +108,7 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
 }
 
 resource "aws_instance" "kutt_instance" {
-  ami                         = "ami-0a9d27a9f4f5c0efc"  # Example AMI ID, replace with the latest one
+  ami                         = "ami-00e89f3f4910f40a1"  
   instance_type               = var.ec2_instance_type
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.allow_ssh_http.id]

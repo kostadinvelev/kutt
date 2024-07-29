@@ -44,6 +44,9 @@ jobs:
       id: get_ip
       run: terraform output -raw public_ip > public_ip.txt
 
+    - name: Debug Public IP
+      run: cat public_ip.txt
+
     - name: Add private key to SSH agent
       uses: webfactory/ssh-agent@v0.5.3
       with:
@@ -51,9 +54,9 @@ jobs:
 
     - name: Deploy to EC2
       run: |
-        PUBLIC_IP=$(cat public_ip.txt)
+        PUBLIC_IP=$(cat public_ip.txt | tr -d '\n')
         echo "Connecting to EC2 instance at $PUBLIC_IP"
-        ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@$PUBLIC_IP <<EOF
+        ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@$PUBLIC_IP << 'EOF'
           cd /app_docker_storage/kutt
           git pull
           docker-compose up -d --build

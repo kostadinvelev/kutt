@@ -37,7 +37,9 @@ jobs:
       run: |
         PRIVATE_KEY=$(terraform output -raw private_key_pem)
         echo "$PRIVATE_KEY" > private_key.pem
-        echo "PRIVATE_KEY=${PRIVATE_KEY}" >> $GITHUB_ENV
+        echo "PRIVATE_KEY<<EOF" >> $GITHUB_ENV
+        echo "$PRIVATE_KEY" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
         cat private_key.pem # Debug step to ensure private key is captured correctly
       shell: bash
 
@@ -45,7 +47,7 @@ jobs:
       id: get_ip
       run: |
         PUBLIC_IP=$(terraform output -raw public_ip)
-        echo "::set-output name=public_ip::$PUBLIC_IP"
+        echo "PUBLIC_IP=${PUBLIC_IP}" >> $GITHUB_ENV
       shell: bash
 
     - name: Add private key to SSH agent
@@ -55,7 +57,7 @@ jobs:
 
     - name: Deploy to EC2
       run: |
-        ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ steps.get_ip.outputs.public_ip }} << 'EOF'
+        ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ env.PUBLIC_IP }} << 'EOF'
           cd /app_docker_storage/kutt
           git pull
           docker-compose up -d --build

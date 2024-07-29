@@ -35,11 +35,14 @@ jobs:
     - name: Capture Private Key
       id: capture_private_key
       run: echo "${{ steps.apply.outputs.private_key_pem }}" > private_key.pem
+      shell: bash
 
-    - name: Set up SSH
+    - name: Add private key to SSH agent
       uses: webfactory/ssh-agent@v0.5.3
       with:
-        ssh-private-key: ${{ steps.capture_private_key.outputs.private_key_pem }}
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      env:
+        SSH_PRIVATE_KEY: ${{ steps.capture_private_key.outputs.private_key_pem }}
 
     - name: Deploy to EC2
       run: |

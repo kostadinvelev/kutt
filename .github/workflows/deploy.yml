@@ -37,10 +37,12 @@ jobs:
       run: |
         echo "${{ steps.apply.outputs.private_key_pem }}" > private_key.pem
         echo "PRIVATE_KEY=$(cat private_key.pem)" >> $GITHUB_ENV
+      shell: bash
 
     - name: Get Public IP
       id: get_ip
       run: echo "public_ip=$(terraform output -raw public_ip)" >> $GITHUB_ENV
+      shell: bash
 
     - name: Add private key to SSH agent
       uses: webfactory/ssh-agent@v0.5.3

@@ -42,7 +42,7 @@ jobs:
 
     - name: Get Public IP
       id: get_ip
-      run: terraform output -raw public_ip > public_ip.txt
+      run: terraform output -raw public_ip | tee public_ip.txt
 
     - name: Debug Public IP
       run: cat public_ip.txt

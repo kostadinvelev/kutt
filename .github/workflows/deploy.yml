@@ -36,8 +36,11 @@ jobs:
       id: capture_private_key
       run: |
         echo "${{ steps.apply.outputs.private_key_pem }}" > private_key.pem
-        echo "PRIVATE_KEY=$(cat private_key.pem)" >> $GITHUB_ENV
+        cat private_key.pem # Debug step to ensure private key is captured correctly
       shell: bash
+
+    - name: Set PRIVATE_KEY environment variable
+      run: echo "PRIVATE_KEY=$(cat private_key.pem)" >> $GITHUB_ENV
 
     - name: Get Public IP
       id: get_ip
@@ -46,16 +49,6 @@ jobs:
         echo "::set-output name=public_ip::$PUBLIC_IP"
       shell: bash
 
-    - name: Debug Private Key
-      run: |
-        echo "Captured private key:"
-        cat private_key.pem
-
-    - name: Debug Environment Variables
-      run: |
-        echo "Environment variables:"
-        env
-        
     - name: Add private key to SSH agent
       uses: webfactory/ssh-agent@v0.5.3
       with:

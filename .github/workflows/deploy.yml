@@ -41,7 +41,9 @@ jobs:
 
     - name: Get Public IP
       id: get_ip
-      run: echo "public_ip=$(terraform output -raw public_ip)" >> $GITHUB_ENV
+      run: |
+        PUBLIC_IP=$(terraform output -raw public_ip)
+        echo "public_ip=${PUBLIC_IP}" >> $GITHUB_ENV
       shell: bash
 
     - name: Add private key to SSH agent

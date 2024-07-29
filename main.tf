@@ -7,8 +7,8 @@ resource "aws_vpc" "main" {
 }
 
 resource "aws_subnet" "public" {
-  vpc_id                 = aws_vpc.main.id
-  cidr_block             = var.subnet_cidr_block
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = var.subnet_cidr_block
   map_public_ip_on_launch = true
 
   tags = {
@@ -111,7 +111,7 @@ resource "aws_instance" "kutt_instance" {
   ami                         = "ami-0c55b159cbfafe1f0"  # Amazon Linux 2 AMI
   instance_type               = var.ec2_instance_type
   subnet_id                   = aws_subnet.public.id
-  security_group_ids          = [aws_security_group.allow_ssh_http.id]
+  vpc_security_group_ids      = [aws_security_group.allow_ssh_http.id]
   key_name                    = var.ssh_key_name
   associate_public_ip_address = true
   iam_instance_profile        = aws_iam_instance_profile.ec2_instance_profile.name

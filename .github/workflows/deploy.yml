@@ -62,19 +62,12 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Deploy to EC2
+    - name: Deploy Kutt Application
       run: |
         PUBLIC_IP=$(cat public_ip.txt | tr -d '\n')
         echo "Connecting to EC2 instance at $PUBLIC_IP"
         ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@$PUBLIC_IP << 'EOF'
-          sudo mkdir -p /app_docker_storage/kutt
-          sudo chown ec2-user:ec2-user /app_docker_storage/kutt
-          cd /app_docker_storage
-          if [ ! -d "kutt" ]; then
-            git clone https://github.com/thedevs-network/kutt
-          fi
-          cd kutt
-          wget https://raw.githubusercontent.com/thedevs-network/kutt/develop/.docker.env -O .env
+          cd /app_docker_storage/kutt
           docker-compose up -d --build
         EOF
       shell: bash

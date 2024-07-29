@@ -21,3 +21,11 @@ sudo usermod -aG docker ec2-user
 # Install Docker Compose
 wget https://github.com/docker/compose/releases/download/v2.23.1/docker-compose-linux-x86_64
 sudo install docker-compose-linux-x86_64 /usr/local/bin/docker-compose
+
+# Clone the Kutt repository
+cd /app_docker_storage
+git clone https://github.com/thedevs-network/kutt
+cd kutt
+
+# Download the .docker.env and rename it to .env
+wget https://raw.githubusercontent.com/thedevs-network/kutt/develop/.docker.env -O .env

@@ -53,7 +53,7 @@ jobs:
       run: |
         PUBLIC_IP=$(cat public_ip.txt)
         echo "Connecting to EC2 instance at $PUBLIC_IP"
-        ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@$PUBLIC_IP << 'EOF'
+        ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@$PUBLIC_IP bash << 'EOF'
           cd /app_docker_storage/kutt
           git pull
           docker-compose up -d --build

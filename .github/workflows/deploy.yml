@@ -42,7 +42,7 @@ jobs:
 
     - name: Get Public IP
       id: get_ip
-      run: terraform output -raw public_ip | tee public_ip.txt
+      run: terraform output -raw public_ip > public_ip.txt
 
     - name: Debug Public IP
       run: cat public_ip.txt
@@ -54,7 +54,7 @@ jobs:
 
     - name: Deploy to EC2
       run: |
-        PUBLIC_IP=$(cat public_ip.txt | tr -d '\n')
+        PUBLIC_IP=$(head -n 1 public_ip.txt | tr -d '\r')
         echo "Connecting to EC2 instance at $PUBLIC_IP"
         ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@$PUBLIC_IP << 'EOF'
           cd /app_docker_storage/kutt

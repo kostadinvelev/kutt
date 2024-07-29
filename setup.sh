@@ -13,7 +13,8 @@ sudo yum install -y docker git
 sudo sed -ie 's%DOCKER_STORAGE_OPTIONS=%DOCKER_STORAGE_OPTIONS="-g /app_docker_storage"%g' /etc/sysconfig/docker-storage
 
 # Enable and start Docker service
-sudo systemctl enable --now docker
+sudo systemctl enable docker
+sudo systemctl start docker
 
 # Add ec2-user to docker group
 sudo usermod -aG docker ec2-user
@@ -24,8 +25,8 @@ sudo install docker-compose-linux-x86_64 /usr/local/bin/docker-compose
 
 # Clone the Kutt repository
 cd /app_docker_storage
-git clone https://github.com/thedevs-network/kutt
+sudo -u ec2-user git clone https://github.com/thedevs-network/kutt
 cd kutt
 
 # Download the .docker.env and rename it to .env
-wget https://raw.githubusercontent.com/thedevs-network/kutt/develop/.docker.env -O .env
+sudo -u ec2-user wget https://raw.githubusercontent.com/thedevs-network/kutt/develop/.docker.env -O .env

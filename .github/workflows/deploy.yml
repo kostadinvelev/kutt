@@ -43,8 +43,13 @@ jobs:
     - name: Get Public IP
       id: get_ip
       run: |
-        PUBLIC_IP=$(terraform output -raw public_ip | head -n 1)
-        echo "PUBLIC_IP=$PUBLIC_IP" >> $GITHUB_ENV
+        terraform output -raw public_ip | tee public_ip.txt | tee -a $GITHUB_ENV
+      shell: bash
+
+    - name: Load Public IP
+      run: |
+        PUBLIC_IP=$(cat public_ip.txt)
+        echo "Loaded PUBLIC_IP=$PUBLIC_IP"
       shell: bash
 
     - name: Add private key to SSH agent
@@ -54,7 +59,8 @@ jobs:
 
     - name: Deploy to EC2
       run: |
-        ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ env.PUBLIC_IP }} << 'EOF'
+        PUBLIC_IP=$(cat public_ip.txt)
+        ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@$PUBLIC_IP << 'EOF'
           cd /app_docker_storage/kutt
           git pull
           docker-compose up -d --build

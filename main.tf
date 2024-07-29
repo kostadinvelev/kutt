@@ -71,9 +71,13 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
+resource "tls_private_key" "example" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
 resource "aws_key_pair" "kutt_key_pair" {
   key_name   = var.ssh_key_name
-  public_key = file("~/.ssh/id_rsa.pub")  # Replace with the path to your public key file
+  public_key = tls_private_key.example.public_key_openssh
 }
 
 resource "aws_eip" "kutt_eip" {
@@ -113,7 +117,7 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
 }
 
 resource "aws_instance" "kutt_instance" {
-  ami                         = "ami-00e89f3f4910f40a1"  
+  ami                         = "ami-0a9d27a9f4f5c0efc"  # Example AMI ID, replace with the latest one
   instance_type               = var.ec2_instance_type
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.allow_ssh_http.id]
@@ -126,6 +130,11 @@ resource "aws_instance" "kutt_instance" {
   }
 
   user_data = file("setup.sh")
+}
+
+output "private_key_pem" {
+  value     = tls_private_key.example.private_key_pem
+  sensitive = true
 }
 
 resource "aws_ebs_volume" "kutt_storage" {

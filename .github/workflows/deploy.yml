@@ -32,10 +32,14 @@ jobs:
       id: apply
       run: terraform apply -var-file=dev.tfvars -auto-approve
 
+    - name: Capture Private Key
+      id: capture-private-key
+      run: echo "${{ steps.apply.outputs.private_key_pem }}" > private_key.pem
+
     - name: Set up SSH
       uses: webfactory/ssh-agent@v0.5.3
       with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+        ssh-private-key: ${{ steps.capture-private-key.outputs.private_key_pem }}
 
     - name: Deploy to EC2
       run: |

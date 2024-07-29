@@ -37,6 +37,7 @@ jobs:
       run: |
         PRIVATE_KEY=$(terraform output -raw private_key_pem)
         echo "$PRIVATE_KEY" > private_key.pem
+        chmod 600 private_key.pem # Set the appropriate permissions
         cat private_key.pem # Debug step to ensure private key is captured correctly
       shell: bash
 

@@ -4,7 +4,8 @@ variable "ec2_instance_type" {
 }
 
 variable "ssh_key_name" {
-  description = "SSH key pair name for EC2 instance"
+  description = "Name of the SSH key pair"
+  default     = "kutt-key-pair"  
 }
 
 variable "vpc_cidr_block" {

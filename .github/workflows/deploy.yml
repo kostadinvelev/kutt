@@ -47,9 +47,11 @@ jobs:
       shell: bash
 
     - name: Add private key to SSH agent
-      uses: webfactory/ssh-agent@v0.5.3
-      with:
-        ssh-private-key: ${{ env.PRIVATE_KEY }}
+      run: |
+        echo "${{ env.PRIVATE_KEY }}" > private_key.pem
+        ssh-add private_key.pem
+      env:
+        PRIVATE_KEY: ${{ steps.capture_private_key.outputs.PRIVATE_KEY }}
 
     - name: Deploy to EC2
       run: |
@@ -59,4 +61,3 @@ jobs:
           docker-compose up -d --build
         EOF
       shell: bash
-  

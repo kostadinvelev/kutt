@@ -35,12 +35,11 @@ jobs:
     - name: Capture Private Key
       id: capture_private_key
       run: |
-        echo "${{ steps.apply.outputs.private_key_pem }}" > private_key.pem
+        PRIVATE_KEY=$(terraform output -raw private_key_pem)
+        echo "$PRIVATE_KEY" > private_key.pem
+        echo "PRIVATE_KEY=${PRIVATE_KEY}" >> $GITHUB_ENV
         cat private_key.pem # Debug step to ensure private key is captured correctly
       shell: bash
-
-    - name: Set PRIVATE_KEY environment variable
-      run: echo "PRIVATE_KEY=$(cat private_key.pem)" >> $GITHUB_ENV
 
     - name: Get Public IP
       id: get_ip

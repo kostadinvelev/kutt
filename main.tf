@@ -125,11 +125,12 @@ resource "aws_instance" "kutt_instance" {
   key_name                    = aws_key_pair.kutt_key_pair.key_name
   associate_public_ip_address = true
   iam_instance_profile        = aws_iam_instance_profile.ec2_instance_profile.name
-  user_data                   = file("setup.sh")
 
   tags = {
     Name = "KuttAppInstance"
   }
+
+  user_data = file("setup.sh")
 }
 
 output "private_key_pem" {

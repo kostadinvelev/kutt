@@ -27,19 +27,6 @@ resource "aws_instance" "kutt_instance" {
   }
 
   user_data = file("${path.module}/setup.sh")
-
-  # Ensure the instance has time to fully initialize
-  provisioner "local-exec" {
-    command = "sleep 300"  # Wait for 5 minutes
-  }
-
-  # Add a null_resource to check instance status
-  provisioner "local-exec" {
-    command = <<-EOT
-      aws ec2 wait instance-status-ok --instance-ids ${self.id} --region ${var.aws_region}
-      echo "Instance ${self.id} is now ready"
-    EOT
-  }
 }
 resource "aws_ebs_volume" "kutt_storage" {
   availability_zone = aws_instance.kutt_instance.availability_zone

@@ -14,12 +14,11 @@ sudo amazon-linux-extras install docker
 echo '{"data-root": "/app_docker_storage"}' | sudo tee /etc/docker/daemon.json > /dev/null
 sudo service docker start
 sudo usermod -a -G docker ec2-user
-# sudo newgrp docker
-sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/bin/docker-compose
-sudo chmod +x /usr/bin/docker-compose
+sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
 
 # Clone and start Kutt
 git clone https://github.com/thedevs-network/kutt
 cd kutt
 cp .docker.env .env
-sudo docker-compose up -d
+docker-compose up -d

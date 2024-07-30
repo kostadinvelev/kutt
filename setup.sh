@@ -1,18 +1,21 @@
 #!/bin/bash
 
 # Create Docker storage
-echo test > /tmp/test
-sudo echo 'type=83' | sudo sfdisk /dev/xvdh
-sudo mkfs.xfs /dev/xvdh1
-sudo mkdir /mbition_docker
-sudo mount /dev/xvdh1 /mbition_docker
+sudo echo 'type=83' | sudo sfdisk /dev/xvdb
+sudo mkfs.xfs /dev/xvdb1
+sudo mkdir /app_docker_storage
+sudo mount /dev/xvdb1 /app_docker_storage
 
 # Install Docker
 sudo yum update -y
 sudo yum install -y docker git
 
-# Set Docker Storage to /k8s directory
-sudo sed -ie 's%DOCKER_STORAGE_OPTIONS=%DOCKER_STORAGE_OPTIONS="-g /mbition_docker"%g' /etc/sysconfig/docker-storage
+# Configure Docker to use the new storage directory
+echo "Configuring Docker storage..."
+sudo mkdir -p /etc/docker
+echo '{
+  "data-root": "/app_docker_storage"
+}' | sudo tee /etc/docker/daemon.json
 
 # Enable and start Docker
 sudo systemctl enable --now docker

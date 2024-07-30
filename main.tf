@@ -130,7 +130,7 @@ resource "aws_instance" "kutt_instance" {
     Name = "KuttAppInstance"
   }
 
-   user_data = "${file("./setup.sh")}"
+   user_data = file("${path.module}/setup.sh")
 }
 
 output "private_key_pem" {

@@ -15,7 +15,29 @@ resource "aws_subnet" "public" {
     Name = "KuttPublicSubnet"
   }
 }
+resource "aws_instance" "kutt_instance" {
+  ami                         = "ami-00e89f3f4910f40a1" 
+  instance_type               = var.ec2_instance_type
+  subnet_id                   = aws_subnet.public.id
+  vpc_security_group_ids      = [aws_security_group.allow_ssh_http.id]
+  key_name                    = aws_key_pair.kutt_key_pair.key_name
+  associate_public_ip_address = true
+  iam_instance_profile        = aws_iam_instance_profile.ec2_instance_profile.name
 
+  tags = {
+    Name = "KuttAppInstance"
+  }
+
+  user_data = file("${path.module}/setup.sh")
+}
+resource "aws_ebs_volume" "kutt_storage" {
+  availability_zone = aws_instance.kutt_instance.availability_zone
+  size              = var.volume_size
+
+  tags = {
+    Name = "KuttStorage"
+  }
+}
 resource "aws_security_group" "allow_ssh_http" {
   vpc_id = aws_vpc.main.id
 
@@ -70,81 +92,16 @@ resource "aws_route_table_association" "public" {
   subnet_id      = aws_subnet.public.id
   route_table_id = aws_route_table.public.id
 }
-
-resource "tls_private_key" "example" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "aws_key_pair" "kutt_key_pair" {
-  key_name   = var.ssh_key_name
-  public_key = tls_private_key.example.public_key_openssh
-}
-
-resource "aws_iam_role" "ec2_instance_role" {
-  name = "ec2_instance_role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = {
-        Service = "ec2.amazonaws.com"
-      }
-    }]
-  })
-
-  tags = {
-    Name = "KuttEC2Role"
-  }
-}
-
-resource "aws_iam_instance_profile" "ec2_instance_profile" {
-  name = "ec2_instance_profile"
-  role = aws_iam_role.ec2_instance_role.name
-
-  tags = {
-    Name = "KuttEC2InstanceProfile"
-  }
-}
-
-resource "aws_instance" "kutt_instance" {
-  ami                         = "ami-00e89f3f4910f40a1" 
-  instance_type               = var.ec2_instance_type
-  subnet_id                   = aws_subnet.public.id
-  vpc_security_group_ids      = [aws_security_group.allow_ssh_http.id]
-  key_name                    = aws_key_pair.kutt_key_pair.key_name
-  associate_public_ip_address = true
-  iam_instance_profile        = aws_iam_instance_profile.ec2_instance_profile.name
-
-  tags = {
-    Name = "KuttAppInstance"
-  }
-
-  user_data = file("${path.module}/setup.sh")
-}
-
-resource "aws_ebs_volume" "kutt_storage" {
-  availability_zone = aws_instance.kutt_instance.availability_zone
-  size              = var.volume_size
-
-  tags = {
-    Name = "KuttStorage"
-  }
-}
-
 resource "aws_volume_attachment" "attach_ebs" {
   device_name = "/dev/xvdb"
   volume_id   = aws_ebs_volume.kutt_storage.id
   instance_id = aws_instance.kutt_instance.id
 }
 
-output "private_key_pem" {
-  value     = tls_private_key.example.private_key_pem
-  sensitive = true
-}
+resource "aws_eip" "kutt_eip" {
+  instance = aws_instance.kutt_instance.id
 
-output "public_ip" {
-  value = aws_instance.kutt_instance.public_ip
+  tags = {
+    Name = "KuttEIP"
+  }
 }

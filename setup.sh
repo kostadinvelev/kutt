@@ -7,21 +7,19 @@ sudo mkfs.xfs /dev/xvdb1
 sudo mkdir /app_docker_storage
 sudo mount /dev/xvdb1 /app_docker_storage
 
-# Install Docker
+# Docker full setup
 sudo yum update -y
-sudo yum install -y docker git
+sudo yum install -y git
+sudo amazon-linux-extras install docker
+echo '{"data-root": "/app_docker_storage"}' | sudo tee /etc/docker/daemon.json > /dev/null
+sudo service docker start
+sudo usermod -a -G docker ec2-user
+# sudo newgrp docker
+sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/bin/docker-compose
+sudo chmod +x /usr/bin/docker-compose
 
-# Set Docker Storage to /k8s directory
-sudo sed -i 's|DOCKER_STORAGE_OPTIONS=|DOCKER_STORAGE_OPTIONS="-g /app_docker_storage"|' /etc/sysconfig/docker-storage
-
-# Enable and start Docker
-sudo systemctl enable --now docker
-
-# Add ec2-user to docker group
-sudo usermod -aG docker ec2-user
+# Clone and start Kutt
 git clone https://github.com/thedevs-network/kutt
 cd kutt
 cp .docker.env .env
-wget https://github.com/docker/compose/releases/download/v2.23.1/docker-compose-linux-x86_64
-sudo install docker-compose-linux-x86_64 /usr/local/bin/docker-compose
-docker-compose up
+sudo docker-compose up -d

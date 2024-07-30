@@ -2,10 +2,10 @@
 
 # Create Docker storage
 echo test > /tmp/test
-sudo echo 'type=83' | sudo sfdisk /dev/xvdh
-sudo mkfs.xfs /dev/xvdh1
+sudo echo 'type=83' | sudo sfdisk /dev/xvdb
+sudo mkfs.xfs /dev/xvdb1
 sudo mkdir /app_docker_storage
-sudo mount /dev/xvdh1 /app_docker_storage
+sudo mount /dev/xvdb1 /app_docker_storage
 
 # Install Docker
 sudo yum update -y

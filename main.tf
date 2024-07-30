@@ -155,3 +155,4 @@ output "private_key_pem" {
 output "public_ip" {
   value = aws_instance.kutt_instance.public_ip
 }
+

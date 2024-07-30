@@ -3,6 +3,8 @@
 # Redirect all output to a log file for debugging
 exec > /tmp/setup.log 2>&1
 
+echo "Starting setup script"
+
 # Create Docker storage
 echo 'type=83' | sudo sfdisk /dev/xvdb
 sudo mkfs.xfs /dev/xvdb1

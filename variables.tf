@@ -3,11 +3,6 @@ variable "ec2_instance_type" {
   default     = "t2.micro"
 }
 
-variable "ssh_key_name" {
-  description = "Name of the SSH key pair"
-  default     = "kutt-key-pair"  
-}
-
 variable "vpc_cidr_block" {
   description = "CIDR block for the VPC"
   default     = "10.0.0.0/16"

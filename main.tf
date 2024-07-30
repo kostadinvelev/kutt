@@ -20,9 +20,7 @@ resource "aws_instance" "kutt_instance" {
   instance_type               = var.ec2_instance_type
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.allow_ssh_http.id]
-  key_name                    = aws_key_pair.kutt_key_pair.key_name
   associate_public_ip_address = true
-  iam_instance_profile        = aws_iam_instance_profile.ec2_instance_profile.name
 
   tags = {
     Name = "KuttAppInstance"

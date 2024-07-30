@@ -12,7 +12,7 @@ sudo yum update -y
 sudo yum install -y docker git
 
 # Set Docker Storage to /k8s directory
-sudo sed -ie 's%DOCKER_STORAGE_OPTIONS=%DOCKER_STORAGE_OPTIONS="-g /app_docker_storage"%g' /etc/sysconfig/docker-storage
+sudo sed -i 's|DOCKER_STORAGE_OPTIONS=|DOCKER_STORAGE_OPTIONS="-g /app_docker_storage"|' /etc/sysconfig/docker-storage
 
 # Enable and start Docker
 sudo systemctl enable --now docker

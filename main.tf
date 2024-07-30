@@ -81,14 +81,6 @@ resource "aws_key_pair" "kutt_key_pair" {
   public_key = tls_private_key.example.public_key_openssh
 }
 
-resource "aws_eip" "kutt_eip" {
-  instance = aws_instance.kutt_instance.id
-
-  tags = {
-    Name = "KuttEIP"
-  }
-}
-
 resource "aws_iam_role" "ec2_instance_role" {
   name = "ec2_instance_role"
 

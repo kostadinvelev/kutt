@@ -17,20 +17,26 @@ sudo sed -ie 's%DOCKER_STORAGE_OPTIONS=%DOCKER_STORAGE_OPTIONS="-g /app_docker_s
 # Enable and start Docker service
 sudo systemctl enable --now docker
 
+# Wait a bit to ensure Docker is fully started
+sleep 10
+
 # Add ec2-user to docker group
 sudo usermod -aG docker ec2-user
 
 # Clone the Kutt repository
 cd /app_docker_storage
-git clone https://github.com/thedevs-network/kutt
+sudo -u ec2-user git clone https://github.com/thedevs-network/kutt
 cd kutt
 
 # Download the .docker.env and rename it to .env
-cp .docker.env .env
+sudo -u ec2-user cp .docker.env .env
 
 # Install Docker Compose
 wget https://github.com/docker/compose/releases/download/v2.23.1/docker-compose-linux-x86_64
 sudo install docker-compose-linux-x86_64 /usr/local/bin/docker-compose
 
+# Ensure permissions are set correctly
+sudo chown -R ec2-user:docker /app_docker_storage
+
 # Start the Kutt application
-docker-compose up
+sudo -u ec2-user docker-compose up -d

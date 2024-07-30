@@ -4,9 +4,8 @@
 exec > /tmp/setup.log 2>&1
 
 # Create Docker storage
-{
 echo "Creating Docker storage..."
-sudo echo 'type=83' | sudo sfdisk /dev/xvdb
+echo 'type=83' | sudo sfdisk /dev/xvdb
 sudo mkfs.xfs /dev/xvdb1
 sudo mkdir /app_docker_storage
 sudo mount /dev/xvdb1 /app_docker_storage
@@ -49,4 +48,3 @@ echo "Checking Docker status..."
 sudo systemctl status docker
 
 echo "Setup script completed."
-} &> /tmp/setup.log

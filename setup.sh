@@ -7,7 +7,7 @@ exec 2>&1
 
 # Create Docker storage
 echo "Creating Docker storage..."
-sudo echo 'type=83' | sudo sfdisk /dev/xvdb
+echo 'type=83' | sudo sfdisk /dev/xvdb
 sudo mkfs.xfs /dev/xvdb1
 sudo mkdir /app_docker_storage
 sudo mount /dev/xvdb1 /app_docker_storage
@@ -53,3 +53,9 @@ sudo chown -R ec2-user:docker /app_docker_storage
 # Start the Kutt application
 echo "Starting Kutt application..."
 sudo -u ec2-user docker-compose up -d
+
+# Check Docker status
+echo "Checking Docker status..."
+sudo systemctl status docker
+
+echo "Setup script completed."

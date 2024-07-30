@@ -22,3 +22,4 @@ git clone https://github.com/thedevs-network/kutt
 cd kutt
 cp .docker.env .env
 docker-compose up -d
+

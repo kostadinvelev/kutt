@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Redirect all output to a log file for debugging
-exec > /tmp/setup.log 2>&1
+exec > >(tee -a /tmp/setup.log) 2>&1
+
+echo "Script started at: $(date)"
 
 # Create Docker storage
 echo "Creating Docker storage..."
@@ -19,6 +21,10 @@ sudo yum install -y docker git
 echo "Enabling and starting Docker service..."
 sudo systemctl enable docker
 sudo systemctl start docker
+
+# Check Docker status
+echo "Checking Docker status..."
+sudo systemctl status docker || sudo journalctl -xe
 
 # Add ec2-user to docker group
 echo "Adding ec2-user to docker group..."
@@ -43,8 +49,4 @@ sudo install docker-compose-linux-x86_64 /usr/local/bin/docker-compose
 echo "Starting Kutt application..."
 sudo -u ec2-user docker-compose up -d
 
-# Check Docker status
-echo "Checking Docker status..."
-sudo systemctl status docker
-
-echo "Setup script completed."
+echo "Setup script completed at: $(date)"

@@ -2,7 +2,7 @@
 
 # Create Docker storage
 echo test > /tmp/test
-sudo echo 'type=83' | sudo sfdisk /dev/xvdb
+sudo echo 'type=83' | sudo sfdisk /dev/xvdb >> /tmp/log
 sudo mkfs.xfs /dev/xvdb1
 sudo mkdir /app_docker_storage
 sudo mount /dev/xvdb1 /app_docker_storage

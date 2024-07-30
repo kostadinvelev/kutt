@@ -117,24 +117,6 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
   }
 }
 
-resource "aws_ebs_volume" "kutt_storage" {
-  availability_zone = aws_instance.kutt_instance.availability_zone
-  size              = var.volume_size
-
-  tags = {
-    Name = "KuttStorage"
-  }
-}
-
-resource "aws_volume_attachment" "attach_ebs" {
-  device_name = "/dev/xvdb"
-  volume_id   = aws_ebs_volume.kutt_storage.id
-  instance_id = aws_instance.kutt_instance.id
-
-  # Ensure the attachment happens before user data script runs
-  depends_on = [aws_instance.kutt_instance]
-}
-
 resource "aws_instance" "kutt_instance" {
   ami                         = "ami-00e89f3f4910f40a1" 
   instance_type               = var.ec2_instance_type
@@ -148,10 +130,22 @@ resource "aws_instance" "kutt_instance" {
     Name = "KuttAppInstance"
   }
 
-  # Ensure the EBS volume is created and attached before the script runs
-  depends_on = [aws_volume_attachment.attach_ebs]
-
   user_data = file("${path.module}/setup.sh")
+}
+
+resource "aws_ebs_volume" "kutt_storage" {
+  availability_zone = aws_instance.kutt_instance.availability_zone
+  size              = var.volume_size
+
+  tags = {
+    Name = "KuttStorage"
+  }
+}
+
+resource "aws_volume_attachment" "attach_ebs" {
+  device_name = "/dev/xvdb"
+  volume_id   = aws_ebs_volume.kutt_storage.id
+  instance_id = aws_instance.kutt_instance.id
 }
 
 output "private_key_pem" {

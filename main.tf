@@ -26,7 +26,7 @@ resource "aws_instance" "kutt_instance" {
     Name = "KuttAppInstance"
   }
 
-  user_data = file("${path.module}/setup.sh")
+  # user_data = file("${path.module}/setup.sh")
 }
 resource "aws_ebs_volume" "kutt_storage" {
   availability_zone = aws_instance.kutt_instance.availability_zone

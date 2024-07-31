@@ -14,8 +14,71 @@ resource "aws_subnet" "public" {
   tags = {
     Name = "KuttPublicSubnet"
   }
+}
 
-  depends_on = [aws_vpc.main]  # Ensure VPC exists before creating the subnet
+resource "aws_security_group" "allow_ssh_http" {
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "AllowSSHHTTP"
+  }
+}
+
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name = "KuttIGW"
+  }
+
+  depends_on = [
+    aws_instance.kutt_instance,
+    aws_volume_attachment.attach_ebs,
+    aws_eip.kutt_eip
+  ]  # Ensure EC2 instance, volume attachment, and EIP are destroyed first
+}
+
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+
+  tags = {
+    Name = "KuttPublicRouteTable"
+  }
+
+  depends_on = [aws_internet_gateway.igw]  # Ensure Internet Gateway exists before creating the route table
+}
+
+resource "aws_route_table_association" "public" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.public.id
+
+  depends_on = [aws_route_table.public]  # Ensure route table exists before associating
 }
 
 resource "aws_instance" "kutt_instance" {
@@ -51,69 +114,6 @@ resource "aws_volume_attachment" "attach_ebs" {
   instance_id = aws_instance.kutt_instance.id
 
   depends_on = [aws_ebs_volume.kutt_storage, aws_instance.kutt_instance]  # Ensure both volume and instance exist before attaching
-}
-
-resource "aws_security_group" "allow_ssh_http" {
-  vpc_id = aws_vpc.main.id
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "AllowSSHHTTP"
-  }
-
-  depends_on = [aws_vpc.main]  # Ensure VPC exists before creating the security group
-}
-
-resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.main.id
-
-  tags = {
-    Name = "KuttIGW"
-  }
-
-  depends_on = [aws_instance.kutt_instance, aws_volume_attachment.attach_ebs]  # Ensure EC2 instance and volume attachment are destroyed first
-}
-
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.main.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
-
-  tags = {
-    Name = "KuttPublicRouteTable"
-  }
-
-  depends_on = [aws_internet_gateway.igw]  # Ensure Internet Gateway exists before creating the route table
-}
-
-resource "aws_route_table_association" "public" {
-  subnet_id      = aws_subnet.public.id
-  route_table_id = aws_route_table.public.id
-
-  depends_on = [aws_route_table.public]  # Ensure route table exists before associating
 }
 
 resource "aws_eip" "kutt_eip" {

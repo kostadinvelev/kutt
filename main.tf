@@ -125,3 +125,4 @@ resource "aws_eip" "kutt_eip" {
     aws_route_table_association.public
   ]  # Ensure instance, Internet Gateway, and route table association exist before creating the EIP
 }
+

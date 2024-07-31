@@ -14,10 +14,12 @@ resource "aws_subnet" "public" {
   tags = {
     Name = "KuttPublicSubnet"
   }
+
+  depends_on = [aws_vpc.main]  # Ensure VPC exists before creating the subnet
 }
 
 resource "aws_instance" "kutt_instance" {
-  ami                         = "ami-00e89f3f4910f40a1" 
+  ami                         = "ami-00e89f3f4910f40a1"
   instance_type               = var.ec2_instance_type
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.allow_ssh_http.id]
@@ -28,6 +30,8 @@ resource "aws_instance" "kutt_instance" {
   }
 
   user_data = file("${path.module}/setup.sh")
+
+  depends_on = [aws_subnet.public, aws_security_group.allow_ssh_http]  # Ensure subnet and security group exist before creating the instance
 }
 
 resource "aws_ebs_volume" "kutt_storage" {
@@ -37,6 +41,16 @@ resource "aws_ebs_volume" "kutt_storage" {
   tags = {
     Name = "KuttStorage"
   }
+
+  depends_on = [aws_instance.kutt_instance]  # Ensure instance exists before creating the volume
+}
+
+resource "aws_volume_attachment" "attach_ebs" {
+  device_name = "/dev/xvdb"
+  volume_id   = aws_ebs_volume.kutt_storage.id
+  instance_id = aws_instance.kutt_instance.id
+
+  depends_on = [aws_ebs_volume.kutt_storage, aws_instance.kutt_instance]  # Ensure both volume and instance exist before attaching
 }
 
 resource "aws_security_group" "allow_ssh_http" {
@@ -66,16 +80,18 @@ resource "aws_security_group" "allow_ssh_http" {
   tags = {
     Name = "AllowSSHHTTP"
   }
+
+  depends_on = [aws_vpc.main]  # Ensure VPC exists before creating the security group
 }
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
 
-  depends_on = [aws_instance.kutt_instance, aws_volume_attachment.attach_ebs]
-
   tags = {
     Name = "KuttIGW"
   }
+
+  depends_on = [aws_instance.kutt_instance, aws_volume_attachment.attach_ebs]  # Ensure EC2 instance and volume attachment are destroyed first
 }
 
 resource "aws_route_table" "public" {
@@ -89,17 +105,15 @@ resource "aws_route_table" "public" {
   tags = {
     Name = "KuttPublicRouteTable"
   }
+
+  depends_on = [aws_internet_gateway.igw]  # Ensure Internet Gateway exists before creating the route table
 }
 
 resource "aws_route_table_association" "public" {
   subnet_id      = aws_subnet.public.id
   route_table_id = aws_route_table.public.id
-}
 
-resource "aws_volume_attachment" "attach_ebs" {
-  device_name = "/dev/xvdb"
-  volume_id   = aws_ebs_volume.kutt_storage.id
-  instance_id = aws_instance.kutt_instance.id
+  depends_on = [aws_route_table.public]  # Ensure route table exists before associating
 }
 
 resource "aws_eip" "kutt_eip" {
@@ -108,4 +122,6 @@ resource "aws_eip" "kutt_eip" {
   tags = {
     Name = "KuttEIP"
   }
+
+  depends_on = [aws_instance.kutt_instance]  # Ensure instance exists before creating the EIP
 }

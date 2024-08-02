@@ -23,3 +23,4 @@ cd kutt
 cp .docker.env .env
 docker-compose up -d
 
+
